@@ -20,39 +20,38 @@ users = [
     {"id": 3, "name": "Dog", "age": 54},
 ]
 
-
 class Post(BaseModel):
     id: int
     title: str
-    content: str
+    body: str
     author: User
 
 posts = [
-    Post(id=1, title="First Post", content="This is First Post", author=users[0] ),
-    Post(id=2, title="Second Post", content="This is Second Post", author=users[1] ),
-    Post(id=3, title="Third Post", content="This is Third Post", author=users[2] )
+    {"id": 1, "title": "Foo", "body": "A very long description", "author": users[0]},
+    {"id": 2, "title": "Foo", "body": "A very long description", "author": users[1]},
+    {"id": 3, "title": "Foo", "body": "A very long description", "author": users[2]}
 ]
 
 
 
-@app.get('/items')
-async def read_items() -> list[Post]:
-    return posts
+@app.get("/items")
+async def get_items() -> list[Post]:
+    return [Post(**post) for post in posts]
 
-@app.get("/items/{item_id}", response_model=Post)
-async def read_item(item_id: int) -> Post:
+@app.get("/items/{item_id}")
+async def get_item(item_id: int) -> Post:
     for post in posts:
-        if post.id == item_id:
-            return post
+        if post["id"] == item_id:
+            return Post(**post)
 
-    raise HTTPException(status_code=404, detail="Post not found")
+    raise HTTPException(status_code=404, detail="Item not found")
 
 @app.get("/search")
 async def search(post_id: int | None = None) -> Post | dict:
     if post_id:
         for post in posts:
-            if post.id == post_id:
-                return post
+            if post["id"] == post_id:
+                return {"data": Post(**post)}
         raise HTTPException(status_code=404, detail="Post not found")
     else:
         return {"error": None}
