@@ -1,11 +1,17 @@
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 import uvicorn
+from pydantic import BaseModel
 
 app = FastAPI()
 
 
-from pydantic import BaseModel
+
+
+class PostCreate(BaseModel):
+    title: str
+    body: str
+    author_id: int
 
 
 
@@ -14,17 +20,19 @@ class User(BaseModel):
     name: str
     age: int
 
-users = [
-    {"id": 1, "name": "John Doe", "age": 30},
-    {"id": 2, "name": "Cat", "age": 25},
-    {"id": 3, "name": "Dog", "age": 54},
-]
-
 class Post(BaseModel):
     id: int
     title: str
     body: str
     author: User
+
+users = [
+    {"id": 1, "name": "John Doe", "age": 30},
+    {"id": 2, "name": "Mike", "age": 25},
+    {"id": 3, "name": "Alice", "age": 44}
+]
+
+
 
 posts = [
     {"id": 1, "title": "Foo", "body": "A very long description", "author": users[0]},
@@ -37,6 +45,19 @@ posts = [
 @app.get("/items")
 async def get_items() -> list[Post]:
     return [Post(**post) for post in posts]
+
+@app.post("/items/add")
+async def add_item(post: PostCreate) -> Post:
+    author = next((user for user in users if user['id'] == post.author_id), None)
+    if not author:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    new_post_id = len(posts) + 1
+    new_post = {"id": new_post_id, "title": post.title, "body": post.body, "author": author}
+    posts.append(new_post)
+
+    return Post(**new_post)
+
 
 @app.get("/items/{item_id}")
 async def get_item(item_id: int) -> Post:
