@@ -4,11 +4,26 @@ import uvicorn
 from typing import Annotated
 from sqlalchemy.orm import Session
 
+from fastapi.middleware.cors import CORSMiddleware
+
 from models import User, Post, Base
 from database import session_local, engine
 from schemas import PostCreate, UserCreate, PostResponse, User as DbUser
 
 app = FastAPI()
+
+origins = [
+    "http://localhost:8080",
+    "http://127.0.0.1:8080",
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 Base.metadata.create_all(bind=engine)
 
@@ -45,6 +60,13 @@ async def create_post(post: PostCreate, db: Session = Depends(get_db)) -> PostRe
 @app.get("/posts/", response_model=list[PostResponse])
 async def get_posts(db: Session = Depends(get_db)) -> list[PostResponse]:
     return db.query(Post).all()
+
+@app.get("/users/{name}", response_model=DbUser)
+async def get_posts(name: str, db: Session = Depends(get_db)):
+    db_user = db.query(User).filter(User.name == name).first()
+    if db_user is None:
+        raise HTTPException(status_code=404, detail="User not found")
+    return db_user
 
 
 # @app.get("/items")
