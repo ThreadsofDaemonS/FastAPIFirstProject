@@ -9,7 +9,7 @@ class User(UserBase):
     id: int
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 class UserCreate(UserBase):
     pass
@@ -29,5 +29,5 @@ class PostResponse(PostBase):
 
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
