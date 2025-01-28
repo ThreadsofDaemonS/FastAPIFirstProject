@@ -1,26 +1,26 @@
-# Базовый образ Node.js
+# Base Node.js image
 FROM node:18
 
-# Устанавливаем рабочую директорию
+# Set the working directory
 WORKDIR /app
 
-# Копируем package.json и package-lock.json
+# Copy package.json and package-lock.json
 COPY package*.json ./
 
-# Устанавливаем зависимости
+# Install dependencies
 RUN npm install
 
-# Копируем весь проект
+# Copy the entire project
 COPY . .
 
-# Собираем проект
+# Build the project
 RUN npm run build
 
-# Устанавливаем сервер для статических файлов
+# Install a static file server
 RUN npm install -g serve
 
-# Указываем порт
+# Specify the port
 EXPOSE 8080
 
-# Запускаем сервер
+# Start the server
 CMD ["serve", "-s", "dist"]

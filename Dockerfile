@@ -1,20 +1,20 @@
-# Базовый образ Python
+# Base Python image
 FROM python:3.11-slim
 
-# Устанавливаем рабочую директорию
+# Set the working directory
 WORKDIR /app
 
-# Копируем зависимости
+# Copy dependencies
 COPY requirements.txt .
 
-# Устанавливаем зависимости
+# Install dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Копируем все файлы проекта
+# Copy all project files
 COPY . .
 
-# Открываем порт приложения
+# Expose the application port
 EXPOSE 8000
 
-# Команда запуска приложения
+# Command to run the application
 CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]

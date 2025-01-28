@@ -25,14 +25,14 @@ app.add_middleware(
 
 
 async def init_db():
-    """Асинхронная инициализация базы данных"""
+    """Asynchronous database initialization"""
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
 
 
 @app.on_event("startup")
 async def on_startup():
-    """Событие запуска приложения"""
+    """Application startup event"""
     await init_db()
 
 
@@ -47,7 +47,7 @@ async def create_user(user: UserCreate, db: AsyncSession = Depends(get_db)) -> D
 
 @app.post("/posts/", response_model=PostResponse)
 async def create_post(post: PostCreate, db: AsyncSession = Depends(get_db)) -> PostResponse:
-    # Проверяем, существует ли автор
+    # Check if the author exists
     result = await db.execute(
         select(User).filter(User.id == post.author_id)
     )
@@ -55,13 +55,13 @@ async def create_post(post: PostCreate, db: AsyncSession = Depends(get_db)) -> P
     if db_user is None:
         raise HTTPException(status_code=404, detail="User not found")
 
-    # Создаём пост
+    # Create the post
     db_post = Post(title=post.title, body=post.body, author_id=post.author_id)
     db.add(db_post)
     await db.commit()
     await db.refresh(db_post)
 
-    # Загружаем связанного автора перед возвратом
+    # Load the associated author before returning
     await db.refresh(db_post, attribute_names=["author"])
     return db_post
 

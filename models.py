@@ -4,7 +4,7 @@ from sqlalchemy.ext.asyncio import AsyncAttrs
 from database import Base
 
 
-class User(Base, AsyncAttrs):  # Подключаем асинхронное поведение
+class User(Base, AsyncAttrs):
     __tablename__ = "users"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
@@ -12,7 +12,7 @@ class User(Base, AsyncAttrs):  # Подключаем асинхронное п�
     age: Mapped[int] = mapped_column(Integer)
 
 
-class Post(Base, AsyncAttrs):  # Подключаем асинхронное поведение
+class Post(Base, AsyncAttrs):
     __tablename__ = "posts"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
@@ -21,4 +21,4 @@ class Post(Base, AsyncAttrs):  # Подключаем асинхронное п�
     author_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"))
 
     # Указываем связь с User
-    author: Mapped[User] = relationship("User", lazy="joined")  # Используем `joined` для предзагрузки
+    author: Mapped[User] = relationship("User", lazy="joined")  # Use `joined` for reloading
