@@ -5,12 +5,15 @@ from models import User, Post
 from database import get_db, engine, Base
 from schemas import PostCreate, UserCreate, PostResponse, User as DbUser
 from fastapi.middleware.cors import CORSMiddleware
+from sqlalchemy.orm import joinedload
 import asyncio
 from sqlalchemy.ext.asyncio import create_async_engine
+from decouple import config
+
 
 app = FastAPI()
 
-origins = ["http://localhost:8080", "http://127.0.0.1:8080"]
+origins = config("CORS_ORIGINS", default="http://localhost:8080").split(",")
 
 app.add_middleware(
     CORSMiddleware,
@@ -44,6 +47,7 @@ async def create_user(user: UserCreate, db: AsyncSession = Depends(get_db)) -> D
 
 @app.post("/posts/", response_model=PostResponse)
 async def create_post(post: PostCreate, db: AsyncSession = Depends(get_db)) -> PostResponse:
+    # Проверяем, существует ли автор
     result = await db.execute(
         select(User).filter(User.id == post.author_id)
     )
@@ -51,17 +55,22 @@ async def create_post(post: PostCreate, db: AsyncSession = Depends(get_db)) -> P
     if db_user is None:
         raise HTTPException(status_code=404, detail="User not found")
 
+    # Создаём пост
     db_post = Post(title=post.title, body=post.body, author_id=post.author_id)
     db.add(db_post)
     await db.commit()
     await db.refresh(db_post)
+
+    # Загружаем связанного автора перед возвратом
+    await db.refresh(db_post, attribute_names=["author"])
     return db_post
 
 
 @app.get("/posts/", response_model=list[PostResponse])
 async def get_posts(db: AsyncSession = Depends(get_db)) -> list[PostResponse]:
-    result = await db.execute(select(Post))
-    return result.scalars().all()
+    result = await db.execute(select(Post).options(joinedload(Post.author)))
+    posts = result.scalars().all()
+    return posts
 
 
 @app.get("/users/{name}", response_model=DbUser)

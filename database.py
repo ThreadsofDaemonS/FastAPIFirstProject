@@ -11,12 +11,12 @@
 #
 # Base = declarative_base()
 
-
+from decouple import config
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
-DATABASE_URL = "postgresql+asyncpg://postgres:password@db:5432/fastapi_db"
+DATABASE_URL = config('DATABASE_URL')
 
 engine = create_async_engine(DATABASE_URL, echo=True)
 async_session_local = sessionmaker(
