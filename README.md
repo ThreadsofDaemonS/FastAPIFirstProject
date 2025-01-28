@@ -27,7 +27,8 @@
 ``` 
 docker-compose up -d
 ```
-3. If you chacnge something in the project:
+3. If you change something in the project:
 ```commandline
+docker-compose down
 docker-compose up -d --build
 ```
