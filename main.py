@@ -1,8 +1,8 @@
 from fastapi import FastAPI, HTTPException, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
-from models import User, Post
-from database import get_db, engine, Base
+from models import User, Post, Base
+from database import get_db, engine
 from schemas import PostCreate, UserCreate, PostResponse, User as DbUser
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import joinedload
